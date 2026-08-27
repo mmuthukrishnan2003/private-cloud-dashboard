@@ -1,10 +1,31 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
-import { ApiService } from '../../services/api.service';
-import { StoragePoolCapacity, ISOImage } from '../../models/vm.model';
+interface IsoImage {
+  name: string;
+  path: string;
+  size_gb?: number;
+}
 
+interface StoragePool {
+  name: string;
+  path?: string;
+  type?: string;
+}
+
+interface StorageCapacity {
+  total_gb: number;
+  used_gb: number;
+  available_gb: number;
+}
+
+interface Network {
+  name: string;
+  type?: string;
+  bridge?: string;
+}
 
 @Component({
   selector: 'app-create-vm',
@@ -13,120 +34,302 @@ import { StoragePoolCapacity, ISOImage } from '../../models/vm.model';
 })
 export class CreateVmComponent implements OnInit {
 
+  // Host/server name displayed in the Create VM page
+  hostName = 'KVM Host';
+
+  // Available ISO images
+  isos: IsoImage[] = [];
+
+  // Available libvirt storage pools
+  pools: StoragePool[] = [];
+
+  // Storage capacity information
+  capacity: StorageCapacity | null = null;
+
+  // Available VM networks
+  networks: Network[] = [];
+
+  // VM creation form
   form: FormGroup;
 
-  pools: string[] = [];
-  networks: string[] = [];
-  isos: ISOImage[] = [];
-
-  capacity: StoragePoolCapacity | null = null;
-
+  // UI state
   submitting = false;
-  errorMessage: string | null = null;
+  loading = true;
+  errorMessage = '';
+
+  /*
+   * Change this if your FastAPI backend uses another URL.
+   *
+   * If Angular is served through Nginx and Nginx proxies /api
+   * to FastAPI, keeping /api is recommended.
+   */
+  private apiUrl = '/api';
 
   constructor(
     private fb: FormBuilder,
-    private api: ApiService,
+    private http: HttpClient,
     private router: Router
   ) {
     this.form = this.fb.group({
-      name: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9][a-zA-Z0-9_.\-]*$/)]],
-      os: ['Ubuntu 22.04 LTS'],
-      iso: [null],
-      vcpus: [4, [Validators.required, Validators.min(1), Validators.max(128)]],
-      ram_gb: [8, [Validators.required, Validators.min(1), Validators.max(1024)]],
-      storage_pool: ['', Validators.required],
-      disk_gb: [100, [Validators.required, Validators.min(10), Validators.max(10000)]],
-      network: ['', Validators.required]
+
+      // VM name
+      name: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(2),
+          Validators.maxLength(64)
+        ]
+      ],
+
+      // CPU cores
+      vcpus: [
+        2,
+        [
+          Validators.required,
+          Validators.min(1),
+          Validators.max(128)
+        ]
+      ],
+
+      // RAM in MB
+      memory_mb: [
+        2048,
+        [
+          Validators.required,
+          Validators.min(512),
+          Validators.max(131072)
+        ]
+      ],
+
+      // Disk size in GB
+      disk_gb: [
+        20,
+        [
+          Validators.required,
+          Validators.min(1),
+          Validators.max(10000)
+        ]
+      ],
+
+      // Storage pool
+      storage_pool: [
+        'default',
+        Validators.required
+      ],
+
+      // ISO image
+      iso: [
+        ''
+      ],
+
+      // Network
+      network: [
+        'default'
+      ]
     });
   }
 
   ngOnInit(): void {
-    this.loadPools();
-    this.loadNetworks();
-    this.loadIsos();
-
-    this.form.get('storage_pool')!.valueChanges.subscribe(pool => {
-      if (pool) {
-        this.loadCapacity(pool);
-      }
-    });
+    this.loadHostInformation();
   }
 
-  loadPools(): void {
-    this.api.getStoragePools().subscribe({
-      next: response => {
-        this.pools = response.pools;
+  /**
+   * Load information required by the Create VM page.
+   *
+   * These API calls are intentionally separated so that one
+   * failed endpoint does not prevent the rest of the page
+   * from loading.
+   */
+  loadHostInformation(): void {
+    this.loading = true;
 
-        if (this.pools.length && !this.form.value.storage_pool) {
-          this.form.patchValue({ storage_pool: this.pools[0] });
+    // Host information
+    this.http.get<any>(`${this.apiUrl}/host`)
+      .subscribe({
+        next: (response) => {
+          this.hostName =
+            response?.hostname ||
+            response?.host_name ||
+            response?.name ||
+            'KVM Host';
+        },
+        error: () => {
+          // Keep a safe fallback if the endpoint does not exist.
+          this.hostName = 'KVM Host';
         }
-      },
-      error: () => {
-        this.pools = [];
-      }
-    });
-  }
+      });
 
-  loadNetworks(): void {
-    this.api.getNetworks().subscribe({
-      next: response => {
-        this.networks = response.networks;
-
-        if (this.networks.length && !this.form.value.network) {
-          this.form.patchValue({ network: this.networks[0] });
+    // ISO images
+    this.http.get<any>(`${this.apiUrl}/vms/isos`)
+      .subscribe({
+        next: (response) => {
+          this.isos =
+            response?.isos ||
+            response ||
+            [];
+        },
+        error: () => {
+          this.isos = [];
         }
-      },
-      error: () => {
-        this.networks = [];
-      }
-    });
+      });
+
+    // Storage pools
+    this.http.get<any>(`${this.apiUrl}/vms/storage-pools`)
+      .subscribe({
+        next: (response) => {
+          this.pools =
+            response?.pools ||
+            response ||
+            [];
+
+          // Select the first available pool if the default
+          // pool is not present.
+          if (
+            this.pools.length > 0 &&
+            !this.pools.some(pool => pool.name === 'default')
+          ) {
+            this.form.patchValue({
+              storage_pool: this.pools[0].name
+            });
+          }
+        },
+        error: () => {
+          // Provide a fallback so the template can still render.
+          this.pools = [
+            {
+              name: 'default',
+              type: 'dir'
+            }
+          ];
+        }
+      });
+
+    // Storage capacity
+    this.http.get<any>(`${this.apiUrl}/vms/storage-capacity`)
+      .subscribe({
+        next: (response) => {
+          this.capacity =
+            response?.capacity ||
+            response ||
+            null;
+        },
+        error: () => {
+          this.capacity = null;
+        }
+      });
+
+    // Networks
+    this.http.get<any>(`${this.apiUrl}/vms/networks`)
+      .subscribe({
+        next: (response) => {
+          this.networks =
+            response?.networks ||
+            response ||
+            [];
+        },
+        error: () => {
+          // Default libvirt network fallback.
+          this.networks = [
+            {
+              name: 'default',
+              type: 'NAT',
+              bridge: 'virbr0'
+            }
+          ];
+        },
+        complete: () => {
+          this.loading = false;
+        }
+      });
+
+    /*
+     * In case the network request completes very quickly or
+     * fails before the complete callback, remove the loading
+     * state after the initialization work has started.
+     */
+    setTimeout(() => {
+      this.loading = false;
+    }, 500);
   }
 
-  loadIsos(): void {
-    this.api.getISOs().subscribe({
-      next: response => {
-        this.isos = response.isos;
-      },
-      error: () => {
-        this.isos = [];
-      }
-    });
-  }
-
-  loadCapacity(pool: string): void {
-    this.api.getStoragePoolCapacity(pool).subscribe({
-      next: capacity => {
-        this.capacity = capacity;
-      },
-      error: () => {
-        this.capacity = null;
-      }
-    });
-  }
-
-  cancel(): void {
-    this.router.navigate(['/']);
-  }
-
+  /**
+   * Called when the Create VM form is submitted.
+   */
   submit(): void {
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
-    this.submitting = true;
-    this.errorMessage = null;
+    // Check available storage before submitting.
+    if (
+      this.capacity &&
+      this.form.value.disk_gb > this.capacity.available_gb
+    ) {
+      this.errorMessage =
+        `Not enough storage. Only ${this.capacity.available_gb} GB is available.`;
 
-    this.api.createVM(this.form.value).subscribe({
-      next: response => {
+      return;
+    }
+
+    this.submitting = true;
+    this.errorMessage = '';
+
+    const payload = {
+      name: this.form.value.name,
+      vcpus: Number(this.form.value.vcpus),
+      memory_mb: Number(this.form.value.memory_mb),
+      disk_gb: Number(this.form.value.disk_gb),
+      storage_pool: this.form.value.storage_pool,
+      iso: this.form.value.iso || null,
+      network: this.form.value.network || 'default'
+    };
+
+    console.log('Creating VM:', payload);
+
+    /*
+     * Send the VM creation request to FastAPI.
+     *
+     * If your backend endpoint is different, change only
+     * the URL below.
+     */
+    this.http.post<any>(
+      `${this.apiUrl}/vms`,
+      payload
+    ).subscribe({
+      next: () => {
         this.submitting = false;
-        this.router.navigate(['/vms', response.vm.name]);
+
+        // Return to the VM list after successful creation.
+        this.router.navigate(['/vms']);
       },
-      error: error => {
+
+      error: (error) => {
+        console.error('VM creation failed:', error);
+
+        this.errorMessage =
+          error?.error?.detail ||
+          error?.error?.message ||
+          'Failed to create VM. Please check the backend logs.';
+
         this.submitting = false;
-        this.errorMessage = error?.error?.detail || 'Failed to create VM.';
       }
     });
+  }
+
+  /**
+   * Cancel VM creation and return to the VM list.
+   */
+  cancel(): void {
+    this.router.navigate(['/vms']);
+  }
+
+  /**
+   * Convenient getter for form controls in the HTML.
+   */
+  get f() {
+    return this.form.controls;
   }
 }

@@ -1,43 +1,132 @@
-.create-vm-page {
+/* =========================================================
+   CREATE VM PAGE
+   ========================================================= */
+
+.create-page {
   padding: 30px;
-  max-width: 640px;
+  background: #f5f7fb;
+  min-height: 100vh;
+  box-sizing: border-box;
 }
 
-.vm-form {
-  background: white;
+
+/* =========================================================
+   PAGE HEADER
+   ========================================================= */
+
+.page-header {
+  margin-bottom: 25px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #101828;
+}
+
+.page-header p {
+  margin-top: 8px;
+  color: #667085;
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   CARD
+   ========================================================= */
+
+.card {
+  background: #ffffff;
+  border: 1px solid #e4e7ec;
   border-radius: 12px;
   padding: 25px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-  display: flex;
-  flex-direction: column;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
+}
+
+.card h2 {
+  margin: 0 0 20px;
+  font-size: 19px;
+  font-weight: 700;
+  color: #101828;
+}
+
+
+/* =========================================================
+   FORM GRID
+   ========================================================= */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 18px;
 }
+
+
+/* =========================================================
+   FORM FIELD
+   ========================================================= */
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
 }
 
-.field-row {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 18px;
-}
-
-label {
+.field label {
   font-size: 13px;
-  color: #6b7280;
   font-weight: 600;
+  color: #344054;
 }
 
-input,
-select {
-  padding: 10px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
+.field input,
+.field select {
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid #d0d5dd;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #101828;
   font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease,
+              box-shadow 0.15s ease;
 }
+
+.field input:focus,
+.field select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+
+/* =========================================================
+   INPUT PLACEHOLDER
+   ========================================================= */
+
+.field input::placeholder {
+  color: #98a2b3;
+}
+
+
+/* =========================================================
+   ERROR MESSAGE
+   ========================================================= */
+
+.error {
+  color: #dc2626;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+
+/* =========================================================
+   CAPACITY INFORMATION
+   ========================================================= */
 
 .capacity-box {
   background: #f3f4f6;
@@ -45,36 +134,82 @@ select {
   padding: 12px 16px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #475467;
+  margin-top: 8px;
+}
+
+
+/* =========================================================
+   ISO DOWNLOAD / LOCAL UPLOAD / NETWORK
+   ========================================================= */
+
+.download-box,
+.upload-box,
+.static-network {
+  margin-top: 20px;
+  padding: 18px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  box-sizing: border-box;
+}
+
+.download-box h3,
+.upload-box h3,
+.static-network h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 15px;
+  color: #344054;
+}
+
+
+/* =========================================================
+   BANNER / WARNING
+   ========================================================= */
+
+.banner {
+  padding: 12px 14px;
+  margin-bottom: 18px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #b91c1c;
   font-size: 13px;
 }
 
-.error {
-  color: #dc2626;
-}
 
-.banner {
-  padding: 10px 14px;
-  background: #fef2f2;
-  border-radius: 8px;
-}
-
-.actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
+/* =========================================================
+   BUTTONS
+   ========================================================= */
 
 button {
-  padding: 10px 18px;
-  border-radius: 8px;
+  border: none;
+  border-radius: 7px;
+  padding: 11px 18px;
   cursor: pointer;
-  border: 0;
   font-size: 14px;
+  font-weight: 600;
+  transition: opacity 0.15s ease,
+              background 0.15s ease;
 }
+
+button:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.2);
+}
+
+
+/* Primary button */
 
 .primary {
   background: #2563eb;
-  color: white;
+  color: #ffffff;
+}
+
+.primary:hover:not(:disabled) {
+  background: #1d4ed8;
 }
 
 .primary:disabled {
@@ -82,7 +217,126 @@ button {
   cursor: not-allowed;
 }
 
+
+/* Secondary button */
+
 .secondary {
-  background: white;
-  border: 1px solid #d1d5db;
+  margin-top: 15px;
+  background: #475467;
+  color: #ffffff;
+}
+
+.secondary:hover {
+  background: #344054;
+}
+
+
+/* Cancel button */
+
+.cancel {
+  background: #ffffff;
+  border: 1px solid #d0d5dd;
+  color: #344054;
+}
+
+.cancel:hover {
+  background: #f9fafb;
+}
+
+
+/* =========================================================
+   ACTION BUTTON AREA
+   ========================================================= */
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+
+/* =========================================================
+   SUMMARY
+   ========================================================= */
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  row-gap: 14px;
+  column-gap: 20px;
+}
+
+.summary-grid span {
+  color: #667085;
+  font-size: 14px;
+}
+
+.summary-grid strong {
+  color: #101828;
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   RESPONSIVE DESIGN
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+  .create-page {
+    padding: 20px;
+  }
+
+  .card {
+    padding: 20px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+    row-gap: 6px;
+  }
+
+  .summary-grid strong {
+    margin-bottom: 8px;
+  }
+
+  .actions {
+    justify-content: stretch;
+    flex-direction: column-reverse;
+  }
+
+  .actions button {
+    width: 100%;
+  }
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  .create-page {
+    padding: 15px;
+  }
+
+  .card {
+    padding: 16px;
+    border-radius: 10px;
+  }
+
+  .page-header h1 {
+    font-size: 24px;
+  }
+
+  .page-header p {
+    font-size: 13px;
+  }
 }

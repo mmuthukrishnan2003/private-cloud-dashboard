@@ -1,0 +1,83 @@
+<div class="vms-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Virtual Machines</h1>
+      <p>Manage and monitor your KVM virtual machines.</p>
+    </div>
+
+    <button class="create-btn" (click)="createVm()">
+      + Create VM
+    </button>
+  </div>
+
+  <!-- No VMs -->
+  <div class="empty-state" *ngIf="vms.length === 0">
+    <div class="empty-icon">🖥️</div>
+
+    <h2>No Virtual Machines</h2>
+
+    <p>
+      Create your first KVM virtual machine to get started.
+    </p>
+
+    <button class="create-btn" (click)="createVm()">
+      + Create VM
+    </button>
+  </div>
+
+  <!-- VM cards -->
+  <div class="vm-grid" *ngIf="vms.length > 0">
+
+    <div
+      class="vm-card"
+      *ngFor="let vm of vms"
+      (click)="openVm(vm)"
+    >
+
+      <div class="vm-card-header">
+        <div>
+          <h2>{{ vm.name }}</h2>
+          <span class="status">
+            {{ vm.state || 'Unknown' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="vm-stats">
+
+        <div class="stat">
+          <span>CPU</span>
+          <strong>
+            {{ vm.cpu_usage || 0 }}%
+          </strong>
+        </div>
+
+        <div class="stat">
+          <span>RAM</span>
+          <strong>
+            {{ vm.memory_usage || 0 }}%
+          </strong>
+        </div>
+
+        <div class="stat">
+          <span>vCPU</span>
+          <strong>
+            {{ vm.vcpus || 0 }}
+          </strong>
+        </div>
+
+        <div class="stat">
+          <span>Memory</span>
+          <strong>
+            {{ vm.memory_mb || 0 }} MB
+          </strong>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
