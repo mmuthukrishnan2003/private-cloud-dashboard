@@ -1,0 +1,109 @@
+.overview {
+  min-height: 100%;
+}
+
+.section {
+  padding: 25px 30px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+.card h3 {
+  margin-top: 0;
+  color: #6b7280;
+}
+
+.value {
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.primary {
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+}
+
+.vm-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.vm-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+}
+
+.vm-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.vm-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.vm-header h3 {
+  margin: 0 0 5px;
+}
+
+.vm-header small {
+  color: #9ca3af;
+}
+
+.status {
+  padding: 5px 10px;
+  border-radius: 20px;
+  background: #e5e7eb;
+  height: fit-content;
+}
+
+.status.running {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.actions button {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.actions .danger {
+  color: #dc2626;
+  border-color: #fecaca;
+}

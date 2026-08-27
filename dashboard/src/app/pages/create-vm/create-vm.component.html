@@ -1,0 +1,90 @@
+<div class="create-vm-page">
+
+  <h1>Create VM</h1>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="vm-form">
+
+    <div class="field">
+      <label>VM Name</label>
+      <input type="text" formControlName="name" placeholder="ubuntu-vm-01" />
+      <small class="error" *ngIf="form.get('name')!.touched && form.get('name')!.invalid">
+        Name must start with a letter or number and use only letters, numbers, '.', '_' or '-'.
+      </small>
+    </div>
+
+    <div class="field">
+      <label>OS</label>
+      <select formControlName="os">
+        <option value="Ubuntu 22.04 LTS">Ubuntu 22.04 LTS</option>
+        <option value="Ubuntu 24.04 LTS">Ubuntu 24.04 LTS</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Install ISO</label>
+      <select formControlName="iso">
+        <option [ngValue]="null">No install media (PXE / existing disk)</option>
+        <option *ngFor="let iso of isos" [value]="iso.name">
+          {{ iso.name }} ({{ iso.size_gb }} GB)
+        </option>
+      </select>
+    </div>
+
+    <div class="field-row">
+
+      <div class="field">
+        <label>CPU</label>
+        <input type="number" formControlName="vcpus" min="1" max="128" />
+        <small>vCPU</small>
+      </div>
+
+      <div class="field">
+        <label>RAM</label>
+        <input type="number" formControlName="ram_gb" min="1" max="1024" />
+        <small>GB</small>
+      </div>
+
+    </div>
+
+    <div class="field">
+      <label>Storage Pool</label>
+      <select formControlName="storage_pool">
+        <option *ngFor="let pool of pools" [value]="pool">{{ pool }}</option>
+      </select>
+    </div>
+
+    <div class="capacity-box" *ngIf="capacity">
+      <div>Total: <strong>{{ capacity.total_gb }} GB</strong></div>
+      <div>Used: <strong>{{ capacity.used_gb }} GB</strong></div>
+      <div>Available: <strong>{{ capacity.available_gb }} GB</strong></div>
+    </div>
+
+    <div class="field">
+      <label>Disk Size (GB)</label>
+      <input type="number" formControlName="disk_gb" min="10" max="10000" />
+      <small class="error" *ngIf="capacity && form.value.disk_gb > capacity.available_gb">
+        Requested disk size exceeds available capacity in this pool.
+      </small>
+    </div>
+
+    <div class="field">
+      <label>Network</label>
+      <select formControlName="network">
+        <option *ngFor="let net of networks" [value]="net">{{ net }}</option>
+      </select>
+    </div>
+
+    <div class="error banner" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+    <div class="actions">
+      <button type="button" class="secondary" (click)="cancel()">Cancel</button>
+      <button type="submit" class="primary" [disabled]="submitting">
+        {{ submitting ? 'Creating…' : 'Create VM' }}
+      </button>
+    </div>
+
+  </form>
+
+</div>

@@ -1,0 +1,39 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f5f7fb;
+}
+
+.dashboard {
+  min-height: 100vh;
+}
+
+.topbar {
+  padding: 22px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #111827;
+  color: white;
+}
+
+.topbar h1 {
+  margin: 0 0 5px;
+}
+
+.topbar h1 a {
+  color: white;
+  text-decoration: none;
+}
+
+.topbar span {
+  color: #9ca3af;
+}
+
+.host-status {
+  color: #22c55e;
+}

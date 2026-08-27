@@ -1,0 +1,97 @@
+<div class="overview">
+
+  <!-- ===================================================
+       MAIN SERVER
+       =================================================== -->
+
+  <section class="section">
+
+    <h2>Main Server Monitoring</h2>
+
+    <div
+      class="cards"
+      *ngIf="host"
+    >
+
+      <div class="card">
+        <h3>CPU</h3>
+        <div class="value">{{ host.cpu.usage_percent }}%</div>
+        <p>{{ host.cpu.threads }} threads</p>
+      </div>
+
+      <div class="card">
+        <h3>RAM</h3>
+        <div class="value">{{ host.memory.usage_percent }}%</div>
+        <p>{{ host.memory.used_gb }} / {{ host.memory.total_gb }} GB</p>
+      </div>
+
+      <div class="card">
+        <h3>Storage</h3>
+        <div class="value">{{ host.storage.usage_percent }}%</div>
+        <p>{{ host.storage.used_gb }} / {{ host.storage.total_gb }} GB</p>
+      </div>
+
+      <div class="card">
+        <h3>Network</h3>
+        <p>RX: {{ host.network.bytes_received }}</p>
+        <p>TX: {{ host.network.bytes_sent }}</p>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================
+       VM SECTION
+       =================================================== -->
+
+  <section class="section">
+
+    <div class="section-header">
+      <h2>Virtual Machines</h2>
+      <button class="primary" (click)="goToCreateVM()">+ Create VM</button>
+    </div>
+
+
+    <div class="vm-grid">
+
+      <div
+        class="vm-card"
+        *ngFor="let vm of vms"
+        (click)="openVM(vm)"
+      >
+
+        <div class="vm-header">
+
+          <div>
+            <h3>{{ vm.name }}</h3>
+            <small>{{ vm.uuid }}</small>
+          </div>
+
+          <span
+            class="status"
+            [class.running]="vm.status === 'Running'"
+          >
+            {{ vm.status }}
+          </span>
+
+        </div>
+
+
+        <div class="actions">
+
+          <button (click)="startVM(vm, $event)">Start</button>
+          <button (click)="stopVM(vm, $event)">Stop</button>
+          <button (click)="restartVM(vm, $event)">Restart</button>
+          <button class="danger" (click)="deleteVM(vm, $event)">Delete</button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</div>

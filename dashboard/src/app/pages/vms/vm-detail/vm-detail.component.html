@@ -1,0 +1,149 @@
+<div class="vm-detail-page" *ngIf="vm">
+
+  <header class="detail-header">
+
+    <div>
+      <h1>{{ vm.name }}</h1>
+      <small>{{ vm.uuid }}</small>
+    </div>
+
+    <div class="header-right">
+      <span class="status" [class.running]="vm.status === 'Running'">{{ vm.status }}</span>
+
+      <div class="power-actions">
+        <button (click)="startVM()">Start</button>
+        <button (click)="stopVM()">Stop</button>
+        <button (click)="restartVM()">Restart</button>
+        <button class="danger" (click)="deleteVM()">Delete</button>
+      </div>
+    </div>
+
+  </header>
+
+  <div class="ip-line" *ngIf="ipAddresses.length">
+    IP: <strong>{{ ipAddresses.join(', ') }}</strong>
+  </div>
+
+
+  <!-- =================================================
+       STATS
+       ================================================= -->
+
+  <section class="section" *ngIf="stats">
+
+    <h2>Statistics</h2>
+
+    <div class="cards" *ngIf="stats.status === 'Running'; else stopped">
+
+      <div class="card">
+        <h3>CPU</h3>
+        <div class="value">{{ stats.cpu?.usage_percent }}%</div>
+        <p>{{ stats.cpu?.vcpus }} vCPU</p>
+      </div>
+
+      <div class="card">
+        <h3>Memory</h3>
+        <div class="value" *ngIf="stats.memory?.used_mb !== null">
+          {{ (stats.memory!.used_mb! / 1024) | number: '1.1-1' }}
+          / {{ (stats.memory!.total_mb / 1024) | number: '1.1-1' }} GB
+        </div>
+        <div class="value" *ngIf="stats.memory?.used_mb === null">
+          {{ (stats.memory!.total_mb / 1024) | number: '1.1-1' }} GB total
+        </div>
+      </div>
+
+      <div class="card" *ngFor="let disk of stats.disks">
+        <h3>Disk {{ disk.device }}</h3>
+        <p>Read: {{ disk.read_bytes | number }} B</p>
+        <p>Write: {{ disk.write_bytes | number }} B</p>
+      </div>
+
+      <div class="card" *ngFor="let net of stats.network">
+        <h3>Net {{ net.device }}</h3>
+        <p>RX: {{ net.rx_bytes | number }} B</p>
+        <p>TX: {{ net.tx_bytes | number }} B</p>
+      </div>
+
+    </div>
+
+    <ng-template #stopped>
+      <p class="muted">VM is stopped — start it to see live statistics.</p>
+    </ng-template>
+
+  </section>
+
+
+  <!-- =================================================
+       STORAGE
+       ================================================= -->
+
+  <section class="section">
+
+    <h2>Storage</h2>
+
+    <h3>Current Disks</h3>
+
+    <table class="disk-table">
+      <thead>
+        <tr>
+          <th>Disk</th>
+          <th>Size</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let disk of disks">
+          <td>{{ disk.target }}</td>
+          <td>{{ disk.size_gb }} GB</td>
+          <td>{{ disk.status }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Add Disk</h3>
+
+    <form [formGroup]="addDiskForm" (ngSubmit)="addDisk()" class="add-disk-form">
+
+      <div class="field">
+        <label>Storage Pool</label>
+        <select formControlName="storage_pool">
+          <option *ngFor="let pool of pools" [value]="pool">{{ pool }}</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Size (GB)</label>
+        <input type="number" formControlName="size_gb" min="1" max="10000" />
+      </div>
+
+      <button type="submit" class="primary" [disabled]="addingDisk">
+        {{ addingDisk ? 'Adding…' : 'Add Disk' }}
+      </button>
+
+    </form>
+
+    <p class="error" *ngIf="addDiskError">{{ addDiskError }}</p>
+
+  </section>
+
+
+  <!-- =================================================
+       CONSOLE
+       ================================================= -->
+
+  <section class="section">
+
+    <h2>Console</h2>
+
+    <div class="console-controls">
+      <button *ngIf="!consoleConnected" (click)="connectConsole()">Connect</button>
+      <button *ngIf="consoleConnected" (click)="disconnectConsole()">Disconnect</button>
+    </div>
+
+    <p class="error" *ngIf="consoleError">{{ consoleError }}</p>
+
+    <div #consoleCanvas class="console-frame"></div>
+
+  </section>
+
+</div>
